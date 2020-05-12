@@ -42,15 +42,14 @@ def a_star(board, start, end):
 
 
     while open_list:
-        n = min(g_score, key = g_score.get)     # Gets the key with the minimum g-score
+        n = min(f_score, key = f_score.get)     # Gets the key with the minimum g-score
 
         if n == end:
             break
 
         open_list.remove(n)
 
-
-        # Finds all neighbors in list
+        # Finds all neighbors in list; There's probably a simpler way to do this but for now this is it
         neighbor_list = []
         for rel_pos in neighbor_rel:
             neighbor_pos = []
@@ -61,8 +60,7 @@ def a_star(board, start, end):
                 else:
                     neighbor_pos.append(neighbor_coord)
             if len(neighbor_pos) == 2:
-                neighbor_list.append(neighbor_pos)
-
+                neighbor_list.append(tuple(neighbor_pos))
 
 
         print(neighbor_list)
