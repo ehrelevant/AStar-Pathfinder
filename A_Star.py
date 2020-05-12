@@ -21,8 +21,8 @@ def run():
     while True:
         #start_pos = tuple(map(int, input('Starting position: ').split(' ')))  # Formats to: [x, y]
         #end_pos = tuple(map(int, input('Ending position: ').split(' ')))
-        start_pos = (0, 0)      # Uses samples for faster testing
-        end_pos = (9, 9)
+        start_pos = (2, 2)      # Uses samples for faster testing
+        end_pos = (2, 9)
 
         a_star(def_board, start_pos, end_pos)
         break
@@ -37,14 +37,19 @@ def a_star(board, start, end):
     # f-score = g-score + h-score
     g_score = {start: 0}
 
-    start_h = (abs(start[0] - end[0]) ** 2)  +  (abs(start[1] - end[1]) ** 2)
+    start_h = math.sqrt(abs(start[0] - end[0]) ** 2)  +  math.sqrt(abs(start[1] - end[1]) ** 2)
     # Kinda like 2D Vector distance calculation
-    h_score = {start: start_h}  # Is this realy necessary??
     f_score = {start: start_h}  # f(start_h) = h(start_h) + g(0)
 
 
     while len(open_list) > 0:
-        n = min(f_score, key = f_score.get)     # Gets the key with the minimum g-score
+        temp_dict = {}
+        for pos in open_list:
+            if pos in f_score.keys():
+                temp_dict[pos] = f_score[pos]
+
+        n = min(temp_dict, key = temp_dict.get)     # Gets the key with the minimum f-score
+
 
         if n == end:
             path = [n]
@@ -52,7 +57,7 @@ def a_star(board, start, end):
                 n = parent[n]
                 path.insert(0, n)
             path.pop(0)
-            pprint.pprint(path)
+            pprint.pprint(f_score)
             
             
             for square in path:
@@ -74,10 +79,11 @@ def a_star(board, start, end):
             if len(neighbor_pos) == 2:
                 neighbor_list.append(tuple(neighbor_pos))
 
-        newG_score = g_score[n] + 1
+
         for neighbor in neighbor_list:
+            newG_score = g_score[n] + 1
+
             if board[neighbor[0]][neighbor[1]] == 1:
-                # neighbor_list.remove(neighbor)
                 continue
             elif neighbor in closed_list:
                 continue
@@ -85,17 +91,17 @@ def a_star(board, start, end):
                 if g_score[neighbor] > newG_score:
                     parent[neighbor] = n
                     g_score[neighbor] = newG_score
-                    f_score[neighbor] = f_score[neighbor] - g_score[neighbor] + newG_score
+                    heuristic = math.sqrt(abs(neighbor[0] - end[0]) ** 2)  +  math.sqrt(abs(neighbor[1] - end[1]) ** 2)
+                    f_score[neighbor] = newG_score + heuristic
             else:
                 open_list.append(neighbor)
                 parent[neighbor] = n
                 g_score[neighbor] = newG_score
-                heuristic = (abs(n[0] - end[0]) ** 2)  +  (abs(n[1] - end[1]) ** 2)
+                heuristic = math.sqrt(abs(n[0] - end[0]) ** 2)  +  math.sqrt(abs(n[1] - end[1]) ** 2)
                 f_score[neighbor] = newG_score + heuristic
+        
         open_list.remove(n)
         closed_list.append(n)
-        f_score.pop(n)
-        g_score.pop(n)
 
 
 def print_board(board):     # Honestly just makes it easier to the eyes
