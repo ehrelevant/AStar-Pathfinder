@@ -1,6 +1,15 @@
-# Yeah this just does A* I guess
+
+
+# A "simple?" A* program in python
+# ==============================================================================================================
+# Current Version Notes:
+# so far, exceptions have yet to be added (for BadValues, for EmptyValues, for OutOfBoundsValues)
+# diagonal movement and more comments are also going to be added soon
+# I also will be implementing this to pygame for a visual interface soon, along with the a process view
+# I'll also make a version of this that takes advantage of classes instead of just using dictionaries
+
+
 import math
-import pprint
 
 def_board = [[0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
              [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
@@ -13,103 +22,80 @@ def_board = [[0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
              [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
              [0, 0, 0, 0, 0, 1, 0, 0, 0, 0]]
 
-neighbor_rel = [[1, 0], [-1, 0], [0, 1], [0, -1]]
+neighbor_rel = [(1, 0), (-1, 0), (0, 1), (0, -1)]
 
 
 def run():
-    # print_board(def_board)
-    while True:
-        #start_pos = tuple(map(int, input('Starting position: ').split(' ')))  # Formats to: [x, y]
-        #end_pos = tuple(map(int, input('Ending position: ').split(' ')))
-        start_pos = (2, 2)      # Uses samples for faster testing
-        end_pos = (2, 9)
+    start_pos = tuple(map(int, input('Starting position: ').split(' ')))  # Formats to: [x, y]
+    end_pos = tuple(map(int, input('Ending position: ').split(' ')))
+    path = a_star(def_board, start_pos, end_pos)
 
-        a_star(def_board, start_pos, end_pos)
-        break
+    print('The shortest path from start to end is:\n' + str(path))
+    print('Board:')
+    for pos in path:
+        def_board[pos[0]][pos[1]] = 2
+    print_board(def_board)
 
 
 def a_star(board, start, end):
     open_list = [start]
     closed_list = []
+    parent_list = {start: None}
 
-    parent = {start: None}
-
-    # f-score = g-score + h-score
+    # Used something kinda like 2D Vector distance calculation
+    # f(start_h) = h(start_h) + g(0)
     g_score = {start: 0}
-
     start_h = math.sqrt(abs(start[0] - end[0]) ** 2)  +  math.sqrt(abs(start[1] - end[1]) ** 2)
-    # Kinda like 2D Vector distance calculation
-    f_score = {start: start_h}  # f(start_h) = h(start_h) + g(0)
+    f_score = {start: start_h}
 
 
     while len(open_list) > 0:
-        temp_dict = {}
-        for pos in open_list:
-            if pos in f_score.keys():
-                temp_dict[pos] = f_score[pos]
-
-        n = min(temp_dict, key = temp_dict.get)     # Gets the key with the minimum f-score
-
+        # Get the key with the minimum f-score
+        n = min(f_score, key = f_score.get)
 
         if n == end:
             path = [n]
-            while n in parent.keys():
-                n = parent[n]
+            while True:
+                n = parent_list[n]
+                if n == None:
+                    break
                 path.insert(0, n)
-            path.pop(0)
-            pprint.pprint(f_score)
-            
-            
-            for square in path:
-                board[square[0]][square[1]] = 2
-            print_board(board)
-            break
+            return path
 
-
-        # Finds all neighbors in list; There's probably a simpler way to do this but for now this is it
+        # Finds all neighbors in list
         neighbor_list = []
         for rel_pos in neighbor_rel:
-            neighbor_pos = []
-            for coord in range(2):
-                neighbor_coord = n[coord] + rel_pos[coord]
-                if neighbor_coord not in range(10):
-                    break
-                else:
-                    neighbor_pos.append(neighbor_coord)
-            if len(neighbor_pos) == 2:
-                neighbor_list.append(tuple(neighbor_pos))
-
+            neighbor_list.append(tuple([sum(x) for x in zip(*[n, rel_pos])]))
 
         for neighbor in neighbor_list:
             newG_score = g_score[n] + 1
-
-            if board[neighbor[0]][neighbor[1]] == 1:
+            if not(neighbor[0] in range(10) and neighbor[1] in range(10)):
+                continue
+            elif board[neighbor[0]][neighbor[1]] == 1:
                 continue
             elif neighbor in closed_list:
                 continue
-            elif neighbor in open_list:
-                if g_score[neighbor] > newG_score:
-                    parent[neighbor] = n
-                    g_score[neighbor] = newG_score
-                    heuristic = math.sqrt(abs(neighbor[0] - end[0]) ** 2)  +  math.sqrt(abs(neighbor[1] - end[1]) ** 2)
-                    f_score[neighbor] = newG_score + heuristic
-            else:
-                open_list.append(neighbor)
-                parent[neighbor] = n
+            elif newG_score < g_score.get(neighbor, newG_score + 1):
+                parent_list[neighbor] = n
                 g_score[neighbor] = newG_score
-                heuristic = math.sqrt(abs(n[0] - end[0]) ** 2)  +  math.sqrt(abs(n[1] - end[1]) ** 2)
-                f_score[neighbor] = newG_score + heuristic
-        
+                f_score[neighbor] = newG_score + math.sqrt(abs(neighbor[0] - end[0]) ** 2)  +  math.sqrt(abs(neighbor[1] - end[1]) ** 2)
+                if neighbor not in open_list:
+                    open_list.append(neighbor)
+
         open_list.remove(n)
         closed_list.append(n)
+        f_score.pop(n)
+        g_score.pop(n)
 
 
-def print_board(board):     # Honestly just makes it easier to the eyes
+# Just to make the numbers easier on the eyes
+def print_board(board):
     for row in board:
         for col in row:
             print(col, end=' ')
         print('')
 
 
+# Starts the program up
 if __name__ == "__main__":
     run()
