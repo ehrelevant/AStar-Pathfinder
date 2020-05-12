@@ -13,8 +13,8 @@ def_board = [[0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
              [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
              [0, 0, 0, 0, 0, 1, 0, 0, 0, 0]]
 
-
 neighbor_rel = [[1, 0], [-1, 0], [0, 1], [0, -1]]
+
 
 def run():
     print_board(def_board)
@@ -28,8 +28,6 @@ def run():
         break
 
 
-
-
 def a_star(board, start, end):
     open_list = [start]
     closed_list = []
@@ -37,16 +35,14 @@ def a_star(board, start, end):
     # f-score = g-score + h-score
     g_score = {start: 0}
 
-    start_h = math.sqrt((start[0] - end[0]) ** 2  +  math.sqrt(start[1] - end[1]) ** 2)
-    # 2D Vector distance calculation or something
+    start_h = math.sqrt((abs(start[0] - end[0]) ** 2)  +  math.sqrt(abs(start[1] - end[1]) ** 2))
+    # 2D Vector distance calculation
     h_score = {start: start_h}
     f_score = {start: start_h}  # f(start_h) = h(start_h) + g(0)
 
 
     while open_list:
-        n = min(g_score)
-
-
+        n = min(g_score, key = g_score.get)     # Gets the key with the minimum g-score
 
         if n == end:
             break
@@ -73,30 +69,11 @@ def a_star(board, start, end):
         break
 
 
-
-
-
-
-
-
-
-
-
-
 def print_board(board):     # Honestly just makes it easier to the eyes
     for row in board:
         for col in row:
             print(col, end=' ')
         print('')
-
-
-
-
-
-
-
-
-
 
 
 if __name__ == "__main__":
