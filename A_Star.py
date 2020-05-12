@@ -11,23 +11,25 @@
 
 import math
 
-def_board = [[0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
-             [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
-             [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
-             [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
-             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-             [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
-             [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
-             [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
-             [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
-             [0, 0, 0, 0, 0, 1, 0, 0, 0, 0]]
+# A Simple 9x9 Board
+def_board = [[0, 0, 0, 0, 1, 0, 0, 0, 0],
+             [0, 0, 0, 0, 1, 0, 0, 0, 0],
+             [0, 0, 0, 0, 1, 0, 0, 0, 0],
+             [0, 0, 0, 0, 1, 1, 1, 0, 1],
+             [0, 0, 0, 0, 0, 0, 0, 0, 0],
+             [0, 0, 0, 0, 1, 0, 0, 0, 0],
+             [0, 0, 0, 0, 1, 0, 0, 0, 0],
+             [0, 0, 0, 0, 1, 0, 0, 0, 0],
+             [0, 0, 0, 0, 1, 0, 0, 0, 0]]
 
-neighbor_rel = [(1, 0), (-1, 0), (0, 1), (0, -1)]
+# Relative Positions of each neighbor
+neighbor_rel = [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (-1, 1), (1, -1), (-1, -1)]
 
 
 def run():
-    start_pos = tuple(map(int, input('Starting position: ').split(' ')))  # Formats to: [x, y]
-    end_pos = tuple(map(int, input('Ending position: ').split(' ')))
+    start_pos = tuple(map(int, input('Starting position: ').split(' ')[::-1]))  # Formats to: [x, y]
+    end_pos = tuple(map(int, input('Ending position: ').split(' ')[::-1]))
+
     path = a_star(def_board, start_pos, end_pos)
 
     print('The shortest path from start to end is:\n' + str(path))
@@ -42,10 +44,9 @@ def a_star(board, start, end):
     closed_list = []
     parent_list = {start: None}
 
-    # Used something kinda like 2D Vector distance calculation
     # f(start_h) = h(start_h) + g(0)
     g_score = {start: 0}
-    start_h = math.sqrt(abs(start[0] - end[0]) ** 2)  +  math.sqrt(abs(start[1] - end[1]) ** 2)
+    start_h = distance(start, end)
     f_score = {start: start_h}
 
 
@@ -68,8 +69,8 @@ def a_star(board, start, end):
             neighbor_list.append(tuple([sum(x) for x in zip(*[n, rel_pos])]))
 
         for neighbor in neighbor_list:
-            newG_score = g_score[n] + 1
-            if not(neighbor[0] in range(10) and neighbor[1] in range(10)):
+            newG_score = g_score[n] + distance(neighbor, n)
+            if not(neighbor[0] in range(len(board[0])) and neighbor[1] in range(len(board))):
                 continue
             elif board[neighbor[0]][neighbor[1]] == 1:
                 continue
@@ -78,7 +79,7 @@ def a_star(board, start, end):
             elif newG_score < g_score.get(neighbor, newG_score + 1):
                 parent_list[neighbor] = n
                 g_score[neighbor] = newG_score
-                f_score[neighbor] = newG_score + math.sqrt(abs(neighbor[0] - end[0]) ** 2)  +  math.sqrt(abs(neighbor[1] - end[1]) ** 2)
+                f_score[neighbor] = newG_score + distance(n, end)
                 if neighbor not in open_list:
                     open_list.append(neighbor)
 
@@ -94,6 +95,11 @@ def print_board(board):
         for col in row:
             print(col, end=' ')
         print('')
+
+
+# The distance formula
+def distance(pos_0, pos_1):
+    return round(math.sqrt((pos_0[0] - pos_1[0]) ** 2  +  (pos_0[1] - pos_1[1]) ** 2))
 
 
 # Starts the program up
