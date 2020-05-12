@@ -21,7 +21,7 @@ def run():
     while True:
         #start_pos = list(map(int, input('Starting position: ').split(' ')))  # Formats to: [x, y]
         #end_pos = list(map(int, input('Ending position: ').split(' ')))
-        start_pos = [0, 0]
+        start_pos = [0, 0]      # Uses samples for faster testing
         end_pos = [9, 9]
 
         a_star(def_board, start_pos, end_pos)
@@ -36,17 +36,25 @@ def a_star(board, start, end):
 
     # f-score = g-score + h-score
     g_score = [0]
-    start_h = math.sqrt((abs(start[0]-end[0])**2)+math.sqrt(abs(start[1]-end[1])**2))
-    f_score = [start_h]
+
+    start_h = math.sqrt((start[0] - end[0]) ** 2  +  math.sqrt(start[1] - end[1]) ** 2)
+    # 2D Vector distance calculation or something
     h_score = [start_h]
+    f_score = [start_h]  # f(start_h) = h(start_h) + g(0)
+
 
     while open_list:
-        n = min(open_list)
+        n = min(g_score)
+
+
+
         if n == end:
             break
 
         open_list.remove(n)
 
+
+        # Finds all neighbors in list
         neighbor_list = []
         for rel_pos in neighbor_rel:
             neighbor_pos = []
@@ -58,6 +66,8 @@ def a_star(board, start, end):
                     neighbor_pos.append(neighbor_coord)
             if len(neighbor_pos) == 2:
                 neighbor_list.append(neighbor_pos)
+
+
 
         print(neighbor_list)
         break
