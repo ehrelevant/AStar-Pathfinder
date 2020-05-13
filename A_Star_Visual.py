@@ -1,6 +1,8 @@
 import pygame as game
 import math, pprint
 import tkinter as tk
+from tkinter import messagebox
+
 
 _WHITE=(255, 255, 255)
 _DARK_GRAY=(64, 64, 64)
@@ -9,7 +11,7 @@ _ORANGE=(255, 165, 0)
 _GREEN=(0, 255, 0)
 _RED=(255, 0, 0)
 
-grid_block = 20
+grid_block = 15
 
 game_speed = 60
 clock = game.time.Clock()
@@ -18,15 +20,13 @@ neighbor_rel = [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (-1, 1), (1, -1), (-1,
 
 # Get tkinter values
 def get_tk():
-    """size = tuple(grid_tb.get().split(" ")[::-1])
-    start = tuple(start_tb.get().split(" ")[::-1])
-    end = tuple(end_tb.get().split(" ")[::-1])
+    size = tuple(map(int, grid_tb.get().split(" ")[::-1]))
+    start = tuple(map(int, start_tb.get().split(" ")[::-1]))
+    end = tuple(map(int, end_tb.get().split(" ")[::-1]))
 
     root.quit()
-    root.destroy()"""
-    size = (10, 10)
-    start = (0, 0)
-    end = (9, 9)
+    root.destroy()
+
     init_pygame(start, end, size=size)
 
 
@@ -51,7 +51,6 @@ def create_grid(size, display):
     display.fill(_WHITE)
     game.display.update()
 
-    pprint.pprint(board)
     return board
 
 
@@ -66,27 +65,36 @@ def game_loop(board, start, end, dis):
             pos = game.mouse.get_pos()
             col = pos[0] // grid_block
             row = pos[1] // grid_block
-            print(f"x:{col} | y:{row}")
+            # print(f"x:{col} | y:{row}")
             draw_block(board, dis, col, row, 1)
         elif game.mouse.get_pressed()[2]: #event.type==pygame.MOUSEBUTTONDOWN
             pos = game.mouse.get_pos()
             col = pos[0] // grid_block
             row = pos[1] // grid_block
-            print(f"x:{col} | y:{row}")
+            # print(f"x:{col} | y:{row}")
             draw_block(board, dis, col, row, 0)
 
         pressed = game.key.get_pressed()
+        if pressed[game.K_r]:
+            for row in range(len(board)):
+                for col in range(len(board[row])):
+                    if board[row][col] in range(2,5):
+                        draw_block(board, dis, col, row, 0)
+
         if pressed[game.K_SPACE]:
-            for row in board:
-                print(row)
-                for col in row:
-                    print(col)
-                    if col in range(2,5):
+            for row in range(len(board)):
+                for col in range(len(board[row])):
+                    if board[row][col] in range(2,5):
                         draw_block(board, dis, col, row, 0)
             
-            path = a_star(board, dis, start, end)
-            for node in path:
-                draw_block(board, dis, node[1], node[0], 4)
+            result = a_star(board, dis, start, end)
+            
+            if not result:
+                messagebox.showerror(title='No Path Found', message='There is no path possible in this board')
+            else:
+                for node in result:
+                    draw_block(board, dis, node[1], node[0], 4)
+
 
         game.display.flip()
         clock.tick(game_speed)
@@ -109,6 +117,7 @@ def a_star(board, dis, start, end):
         # Get the key with the minimum f-score
         n = min(f_score, key = f_score.get)
 
+
         if n == end:
             path = [n]
             while True:
@@ -122,14 +131,20 @@ def a_star(board, dis, start, end):
         neighbors = [tuple([sum(x) for x in zip(n, rel_pos)]) for rel_pos in neighbor_rel]
 
         for neighbor in neighbors:
-            newG_score = g_score[n] + distance(neighbor, n)
+            move_dist = distance(neighbor, n)
+            newG_score = g_score[n] + move_dist
             if not(neighbor[0] in range(len(board[0])) and neighbor[1] in range(len(board))):
                 continue
             elif board[neighbor[0]][neighbor[1]] == 1:
                 continue
             elif neighbor in closed_list:
                 continue
-            elif newG_score < g_score.get(neighbor, newG_score + 1):
+
+            if move_dist > 1:
+                pos_checks = list(zip(n, neighbor[::-1]))
+                if board[pos_checks[0][0]][pos_checks[0][1]] == 1 and board[pos_checks[1][1]][pos_checks[1][0]] == 1:
+                    continue
+            if newG_score < g_score.get(neighbor, newG_score + 1):
                 parent_list[neighbor] = n
                 g_score[neighbor] = newG_score
                 f_score[neighbor] = newG_score + distance(n, end)
@@ -143,12 +158,13 @@ def a_star(board, dis, start, end):
         draw_block(board, dis, n[1], n[0], 3)
         f_score.pop(n)
         g_score.pop(n)
-        print(open_list)
+
+    return False
 
 
 # The distance formula
 def distance(pos_0, pos_1):
-    return round(math.sqrt((pos_0[0] - pos_1[0]) ** 2  +  (pos_0[1] - pos_1[1]) ** 2))
+    return round(math.sqrt((pos_0[0] - pos_1[0]) ** 2  +  (pos_0[1] - pos_1[1]) ** 2), 2)
 
 
 def draw_block(board, dis, x, y, set_value):
@@ -167,8 +183,8 @@ def draw_block(board, dis, x, y, set_value):
 
 
 if __name__ == "__main__":
-    """root = tk.Tk()
-    grid_label = tk.Label(root, text="Grid (Max:20): ")
+    root = tk.Tk()
+    grid_label = tk.Label(root, text="Grid (Max:40): ")
     grid_tb = tk.Entry(root)
     start_label = tk.Label(root, text="Start: ")
     start_tb = tk.Entry(root)
@@ -185,5 +201,5 @@ if __name__ == "__main__":
     submit.grid(columnspan=2, row=3)
 
     root.update()
-    root.mainloop()"""
+    root.mainloop()
     get_tk()
