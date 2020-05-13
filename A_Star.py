@@ -2,9 +2,9 @@
 
 # A "simple?" A* program in python
 # ==============================================================================================================
-# Current Version Notes:
+# Future Changes Notes:
 # so far, exceptions have yet to be added (for BadValues, for EmptyValues, for OutOfBoundsValues)
-# diagonal movement and more comments are also going to be added soon
+# more comments are also going to be added soon
 # I also will be implementing this to pygame for a visual interface soon, along with the a process view
 # I'll also make a version of this that takes advantage of classes instead of just using dictionaries
 
@@ -15,20 +15,31 @@ import math
 def_board = [[0, 0, 0, 0, 1, 0, 0, 0, 0],
              [0, 0, 0, 0, 1, 0, 0, 0, 0],
              [0, 0, 0, 0, 1, 0, 0, 0, 0],
-             [0, 0, 0, 0, 1, 1, 1, 0, 1],
+             [0, 0, 0, 0, 1, 0, 0, 0, 0],
              [0, 0, 0, 0, 0, 0, 0, 0, 0],
              [0, 0, 0, 0, 1, 0, 0, 0, 0],
              [0, 0, 0, 0, 1, 0, 0, 0, 0],
              [0, 0, 0, 0, 1, 0, 0, 0, 0],
              [0, 0, 0, 0, 1, 0, 0, 0, 0]]
 
+# A Simple 9x9 Maze Board
+maze_board = [[0, 1, 0, 0, 1, 0, 0, 0, 1],
+              [0, 1, 0, 1, 1, 0, 1, 0, 1],
+              [0, 0, 0, 0, 0, 0, 1, 1, 0],
+              [0, 1, 0, 1, 1, 0, 0, 1, 0],
+              [1, 1, 0, 0, 0, 1, 1, 1, 0],
+              [0, 0, 0, 1, 0, 0, 0, 0, 0],
+              [1, 1, 0, 1, 0, 1, 0, 1, 0],
+              [1, 0, 0, 1, 0, 1, 0, 0, 1],
+              [1, 0, 1, 0, 0, 0, 1, 0, 0]]
+
 # Relative Positions of each neighbor
 neighbor_rel = [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (-1, 1), (1, -1), (-1, -1)]
 
 
 def run():
-    start_pos = tuple(map(int, input('Starting position: ').split(' ')[::-1]))  # Formats to: [x, y]
-    end_pos = tuple(map(int, input('Ending position: ').split(' ')[::-1]))
+    start_pos = tuple(map(int, input('Starting position("x y"): ').split(' ')[::-1]))  # Formats to: [x, y]
+    end_pos = tuple(map(int, input('Ending position("x y"): ').split(' ')[::-1]))
 
     path = a_star(def_board, start_pos, end_pos)
 
@@ -63,12 +74,10 @@ def a_star(board, start, end):
                 path.insert(0, n)
             return path
 
-        # Finds all neighbors in list
-        neighbor_list = []
-        for rel_pos in neighbor_rel:
-            neighbor_list.append(tuple([sum(x) for x in zip(*[n, rel_pos])]))
+        # Finds all neighbors in list, Makes a generator object (No noticable performance gain)
+        neighbors = [tuple([sum(x) for x in zip(n, rel_pos)]) for rel_pos in neighbor_rel]
 
-        for neighbor in neighbor_list:
+        for neighbor in neighbors:
             newG_score = g_score[n] + distance(neighbor, n)
             if not(neighbor[0] in range(len(board[0])) and neighbor[1] in range(len(board))):
                 continue
