@@ -28,6 +28,7 @@ def get_tk():
     root.destroy()
 
     init_pygame(start, end, size=size)
+    
 
 
 def init_pygame(start, end, size=(10, 10)):
@@ -90,7 +91,7 @@ def game_loop(board, start, end, dis):
             result = a_star(board, dis, start, end)
             
             if not result:
-                messagebox.showerror(title='No Path Found', message='There is no path possible in this board')
+                # messagebox.showerror(title='No Path Found', message='There is no path possible in this board')
             else:
                 for node in result:
                     draw_block(board, dis, node[1], node[0], 4)
