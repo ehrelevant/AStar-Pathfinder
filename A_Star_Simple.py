@@ -80,6 +80,7 @@ def a_star(board, start, end):
             return path
 
         # Finds all neighbors in list, Makes a generator object (No noticable performance gain)
+        neighbor_rel = [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (-1, 1), (1, -1), (-1, -1)]
         neighbors = [tuple([sum(x) for x in zip(n, rel_pos)]) for rel_pos in neighbor_rel]
 
         for neighbor in neighbors:

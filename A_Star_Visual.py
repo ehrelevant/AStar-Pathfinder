@@ -92,6 +92,7 @@ def game_loop(board, start, end, dis):
             
             if not result:
                 # messagebox.showerror(title='No Path Found', message='There is no path possible in this board')
+                pass
             else:
                 for node in result:
                     draw_block(board, dis, node[1], node[0], 4)
